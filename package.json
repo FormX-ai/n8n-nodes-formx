@@ -1,19 +1,24 @@
 {
-  "name": "n8n-nodes-<...>",
+  "name": "n8n-nodes-formx",
   "version": "0.1.0",
-  "description": "",
+  "description": "n8n node to integrate with FormX",
   "keywords": [
-    "n8n-community-node-package"
+    "n8n-community-node-package",
+    "n8n",
+    "n8n-node",
+    "automation",
+    "extract",
+    "ocr"
   ],
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://github.com/FormX-ai/n8n-nodes-formx",
   "author": {
-    "name": "",
-    "email": ""
+    "name": "Peter Kong",
+    "email": "pkong.work@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/<...>/n8n-nodes-<...>.git"
+    "url": "https://github.com/FormX-ai/n8n-nodes-formx.git"
   },
   "main": "index.js",
   "scripts": {
