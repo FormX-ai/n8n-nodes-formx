@@ -19,8 +19,13 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions): Promise<INodeExecutionData[]> {
 	// TODO: Implement /v2/extractor
-	console.log('called execute for extractor - extract');
-	const returnData: INodeExecutionData[] = [];
+	const response = await this.helpers.httpRequest({
+		url: 'https://postman-echo.com/get',
+		body: this.getInputData(),
+	});
+
+	console.log({ response });
+	const returnData: INodeExecutionData[] = [{ json: response as IDataObject }];
 
 	return returnData;
 }

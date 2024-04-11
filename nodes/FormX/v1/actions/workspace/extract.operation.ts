@@ -1,4 +1,9 @@
-import type { IExecuteFunctions, INodeExecutionData, INodeProperties } from 'n8n-workflow';
+import type {
+	IDataObject,
+	IExecuteFunctions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 import { updateDisplayOptions } from '../../../../utils/updateDisplayOptions';
 
 const properties: INodeProperties[] = [];
@@ -14,7 +19,12 @@ export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions): Promise<INodeExecutionData[]> {
 	// TODO: Implement /v2/workspace
-	console.log('called execute for workspace - extract');
-	const returnData: INodeExecutionData[] = [];
+	const response = await this.helpers.httpRequest({
+		url: 'https://postman-echo.com/get',
+		body: this.getInputData(),
+	});
+
+	console.log({ response });
+	const returnData: INodeExecutionData[] = [{ json: response as IDataObject }];
 	return returnData;
 }
