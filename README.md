@@ -41,8 +41,6 @@ Then, you
 ### Extractor ID
 Go to [Extractors](https://formextractorai.com/extractor) to create new/select existing extractor, go to Settings, copy its id.
 
-
-
 This node is compatible with n8n version 0.184.0 and above. We have tested the node with n8n version 0.184.0 and 0.187.0, and no known version incompatibility issues have been identified.
 
 ## Usage
@@ -70,4 +68,7 @@ If you're new to n8n, you can check out the [Try it out](https://docs.n8n.io/try
 
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
 * [FormX documentation](https://help.formx.ai/)
+
+## Contribution
+Please refer to [Contribution.md](https://github.com/FormX-ai/n8n-nodes-formx/Contribution.md)
 
