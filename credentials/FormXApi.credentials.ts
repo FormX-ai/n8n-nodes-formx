@@ -5,6 +5,7 @@ export class FormXApi implements ICredentialType {
 	displayName = 'FormX API';
 	documentationUrl = 'https://github.com/FormX-ai/n8n-nodes-formx';
 	properties: INodeProperties[] = [
+		// TODO: Add access token & extractor ID
 		{
 			displayName: 'API Key',
 			name: 'apiKey',
