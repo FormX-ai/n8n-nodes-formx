@@ -1,19 +1,24 @@
 {
-  "name": "n8n-nodes-nasapics",
-  "version": "0.1.0",
-  "description": "n8n node to call NASA's APOD and Mars Rover Photo services.",
+  "name": "n8n-nodes-formx",
+  "version": "0.0.1",
+  "description": "n8n node to FormX extraction services.",
   "keywords": [
-    "n8n-community-node-package"
+    "n8n-community-node-package",
+    "n8n",
+    "n8n-node",
+    "automation",
+    "extract",
+    "ocr"
   ],
   "license": "MIT",
-  "homepage": "https://n8n.io",
+  "homepage": "https://www.formx.ai",
   "author": {
     "name": "Peter Kong",
     "email": "pkongz@oursky.com"
   },
   "repository": {
     "type": "git",
-    "url": "REPLACE_ME_WITH_GITHUB_URL"
+    "url": "https://github.com/FormX-ai/n8n-nodes-formx"
   },
   "main": "index.js",
   "scripts": {
@@ -30,10 +35,10 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/NasaPicsApi.credentials.js"
+      "dist/credentials/FormXApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/NasaPics/NasaPics.node.js"
+      "dist/nodes/FormX/FormX.node.js"
     ]
   },
   "devDependencies": {

@@ -2,8 +2,8 @@ import { INodeProperties, INodeType, INodeTypeDescription } from 'n8n-workflow';
 
 const nodeDescription: Omit<INodeTypeDescription, 'properties'> = {
 	displayName: 'NASA Pics',
-	name: 'NasaPics',
-	icon: 'file:nasapics.svg',
+	name: 'FormX',
+	icon: 'file:formx.png',
 	group: ['transform'],
 	version: 1,
 	subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
@@ -15,7 +15,7 @@ const nodeDescription: Omit<INodeTypeDescription, 'properties'> = {
 	outputs: ['main'],
 	credentials: [
 		{
-			name: 'NasaPicsApi',
+			name: 'FormXApi',
 			required: true,
 		},
 	],
@@ -178,7 +178,7 @@ const additionalFields: INodeProperties[] = [
 		],
 	},
 ];
-export class NasaPics implements INodeType {
+export class FormX implements INodeType {
 	description: INodeTypeDescription = {
 		...nodeDescription,
 		properties: [...resources, ...operations, ...additionalFields],
