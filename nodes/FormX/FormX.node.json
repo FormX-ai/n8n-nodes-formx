@@ -2,9 +2,7 @@
 	"node": "n8n-nodes-base.formX",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": [
-		"Miscellaneous"
-	],
+	"categories": ["Miscellaneous"],
 	"resources": {
 		"credentialDocumentation": [
 			{
@@ -40,9 +38,6 @@
 		"data"
 	],
 	"subcategories": {
-		"Core Nodes": [
-			"Files",
-			"Data Transformation"
-		]
+		"Core Nodes": ["Files", "Data Transformation"]
 	}
 }
