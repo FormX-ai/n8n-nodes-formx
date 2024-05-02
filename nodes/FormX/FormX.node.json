@@ -1,0 +1,43 @@
+{
+	"node": "n8n-nodes-base.formX",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Miscellaneous"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://help.formx.ai/reference/document-extraction"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://help.formx.ai/reference/document-extraction"
+			}
+		]
+	},
+	"alias": [
+		"CSV",
+		"Spreadsheet",
+		"Excel",
+		"xls",
+		"xlsx",
+		"tabular",
+		"File",
+		"PDF",
+		"JSON",
+		"HTML",
+		"ICS",
+		"iCal",
+		"txt",
+		"Text",
+		"RTF",
+		"XML",
+		"64",
+		"ocr",
+		"FormX",
+		"data"
+	],
+	"subcategories": {
+		"Core Nodes": ["Files", "Data Transformation"]
+	}
+}
