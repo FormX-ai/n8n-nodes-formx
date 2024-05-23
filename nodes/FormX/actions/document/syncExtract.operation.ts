@@ -119,8 +119,8 @@ const properties: INodeProperties[] = [...operations, ...additionalFields];
 
 const displayOptions: IDisplayOptions = {
 	show: {
-		resource: ['extractor'],
-		operations: ['extractSync'],
+		resource: ['document'],
+		operation: ['syncExtract'],
 	},
 };
 
