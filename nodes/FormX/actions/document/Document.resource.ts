@@ -1,7 +1,8 @@
 import { INodeProperties } from 'n8n-workflow';
 import * as syncExtract from './syncExtract.operation';
+import * as asyncExtract from './asyncExtract.operation';
 
-export { syncExtract };
+export { syncExtract, asyncExtract };
 
 export const description: INodeProperties[] = [
 	{
@@ -16,7 +17,12 @@ export const description: INodeProperties[] = [
 				description: 'Extract document',
 				action: 'Extract document',
 			},
-			// TODO: Add extractAsync
+			{
+				name: 'Async Extract',
+				value: 'asyncExtract',
+				description: 'Async Extract document',
+				action: 'Async extract document',
+			},
 		],
 		default: 'syncExtract',
 		displayOptions: {
@@ -26,4 +32,5 @@ export const description: INodeProperties[] = [
 		},
 	},
 	...syncExtract.description,
+	...asyncExtract.description,
 ];
