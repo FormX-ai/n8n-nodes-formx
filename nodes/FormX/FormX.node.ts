@@ -1,5 +1,6 @@
-import { INodeType, INodeTypeDescription } from 'n8n-workflow';
+import { IExecuteFunctions, INodeType, INodeTypeDescription } from 'n8n-workflow';
 import { actionProperties } from './actions/actionProperties';
+import { router } from './actions/router';
 
 export class FormX implements INodeType {
 	description: INodeTypeDescription = {
@@ -23,14 +24,10 @@ export class FormX implements INodeType {
 				required: true,
 			},
 		],
-		// ref https://help.formx.ai/reference/document-extraction
-		requestDefaults: {
-			baseURL: 'https://worker.formextractorai.com',
-			headers: {
-				Accept: 'application/json',
-				'Content-Type': 'image/*',
-			},
-		},
 		properties: [...actionProperties],
 	};
+
+	async execute(this: IExecuteFunctions) {
+		return await router.call(this);
+	}
 }
