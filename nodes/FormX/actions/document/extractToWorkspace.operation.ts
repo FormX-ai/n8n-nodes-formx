@@ -13,6 +13,13 @@ import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
 
 const operations: INodeProperties[] = [
 	{
+		displayName: 'Workspace ID',
+		name: 'workspaceId',
+		type: 'string',
+		default: '',
+		placeholder: '',
+	},
+	{
 		displayName: 'Image URL',
 		name: 'imageUrl',
 		type: 'string',
@@ -29,6 +36,13 @@ const additionalFields: INodeProperties[] = [
 		default: {},
 		placeholder: 'Add Field',
 		options: [
+			{
+				displayName: 'File name',
+				name: 'fileName',
+				type: 'string',
+				default: '',
+				placeholder: '',
+			},
 			{
 				displayName: 'Processing Mode',
 				name: 'processingMode',
@@ -94,12 +108,15 @@ const properties: INodeProperties[] = [...operations, ...additionalFields];
 const displayOptions: IDisplayOptions = {
 	show: {
 		resource: ['document'],
-		operation: ['asyncExtract'],
+		operation: ['extractToWorkspace'],
 	},
 };
 export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
+	const workspaceId = this.getNodeParameter('workspaceId', i, undefined, {
+		extractValue: true,
+	});
 	const imageUrl = this.getNodeParameter('imageUrl', i, undefined, {
 		extractValue: true,
 	});
@@ -109,16 +126,17 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 		headers: {
 			Accept: 'application/json',
 			'Content-Type': 'application/json',
-			'X-WORKER-ASYNC': 'true',
+			'X-WORKER-WORKSPACE-ID': workspaceId,
 			'X-WORKER-ENCODING': 'raw',
 			'X-WORKER-IMAGE-URL': imageUrl,
 			'X-WORKER-PDF-DPI': '150',
+			'X-WORKER-WORKSPACE-FILE-NAME': additionalFields?.['fileName'],
 			'X-WORKER-PROCESSING-MODE': additionalFields?.['processingMode'] ?? 'per-page',
 			'X-WORKER-AUTO-ADJUST-IMAGE-SIZE': additionalFields?.['autoAdjustImageSize'] ?? true,
 			'X-WORKER-OCR-ENGINE': additionalFields?.['ocrEngine'] ?? '',
 		},
 		method: 'POST',
-		url: `https://worker.formextractorai.com/v2/extract`,
+		url: `https://worker.formextractorai.com/v2/workspace`,
 	};
 
 	const response = (await this.helpers.httpRequestWithAuthentication.call(
