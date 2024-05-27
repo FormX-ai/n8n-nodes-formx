@@ -8,86 +8,9 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
+import { commonProperties } from './commonProperties';
 
-const operations: INodeProperties[] = [
-	{
-		displayName: 'Image URL',
-		name: 'imageUrl',
-		type: 'string',
-		default: '',
-		placeholder: 'https://formextractorai.com/sample-invoice-1.d551279a.jpg',
-	},
-];
-
-const additionalFields: INodeProperties[] = [
-	{
-		displayName: 'Additional Fields',
-		name: 'additionalFields',
-		type: 'collection',
-		default: {},
-		placeholder: 'Add Field',
-		options: [
-			{
-				displayName: 'Processing Mode',
-				name: 'processingMode',
-				type: 'options',
-				options: [
-					{
-						name: 'per-page',
-						value: 'per-page',
-					},
-					{
-						name: 'per-file',
-						value: 'per-file',
-					},
-					{
-						name: 'multiple-documents-per-page',
-						value: 'multiple-documents-per-page',
-					},
-				],
-				default: 'per-page',
-			},
-			{
-				displayName: 'Auto Adjust Image Size',
-				name: 'autoAdjustImageSize',
-				type: 'boolean',
-				default: true,
-			},
-			{
-				displayName: 'Specify OCR Engine',
-				name: 'ocrEngine',
-				type: 'options',
-				options: [
-					{
-						name: '', // FIXME: investigate on nullable option
-						value: '',
-					},
-					{
-						name: 'google',
-						value: 'google',
-					},
-					{
-						name: 'azure',
-						value: 'azure',
-					},
-					{
-						name: 'tesseract',
-						value: 'tesseract',
-					},
-				],
-				default: '',
-			},
-			{
-				displayName: 'PDF DPI',
-				name: 'pdfDpi',
-				type: 'number',
-				default: 150,
-			},
-		],
-	},
-];
-
-const properties: INodeProperties[] = [...operations, ...additionalFields];
+const properties: INodeProperties[] = [...commonProperties()];
 
 const syncDisplayOptions: IDisplayOptions = {
 	show: {
