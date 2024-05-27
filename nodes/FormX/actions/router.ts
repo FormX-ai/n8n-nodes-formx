@@ -14,15 +14,15 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 		operation,
 	} as FormxType;
 
+	const resourceMap = {
+		document: document,
+	};
+
 	for (let i = 0; i < items.length; i++) {
 		try {
-			switch (formx.resource) {
-				case 'document':
-					returnData.push(...(await document[formx.operation].execute.call(this, i)));
-					break;
-				default:
-					throw new NodeOperationError(this.getNode(), `The resource "${resource}" is not known`);
-			}
+			returnData.push(
+				...(await resourceMap[formx.resource][formx.operation].execute.call(this, i)),
+			);
 		} catch (error) {
 			if (this.continueOnFail()) {
 				returnData.push({ json: { error: error.message } });
