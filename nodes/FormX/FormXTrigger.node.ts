@@ -7,6 +7,7 @@ import {
 	type IWebhookFunctions,
 	type IWebhookResponseData,
 } from 'n8n-workflow';
+import { config } from '../config';
 
 export class FormXTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -114,7 +115,7 @@ export class FormXTrigger implements INodeType {
 						'Content-Type': 'application/json',
 					},
 					method: 'POST',
-					url: `https://api.form-extractor.pandawork.com/zapier-webhook`,
+					url: `${config.formxApiBaseUrl}/zapier-webhook`,
 					body: {
 						zap_id: 'TO BE REMOVE',
 						hook: webhookUrl,
@@ -159,7 +160,7 @@ export class FormXTrigger implements INodeType {
 							'Content-Type': 'application/json',
 						},
 						method: 'DELETE',
-						url: `https://api.form-extractor.pandawork.com/zapier-webhook`,
+						url: `${config.formxApiBaseUrl}/zapier-webhook`,
 						body: {
 							workspace_webhook_id: webhookData.webhookId,
 							secret: webhookData.secret,

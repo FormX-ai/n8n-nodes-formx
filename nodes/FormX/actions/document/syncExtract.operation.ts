@@ -7,6 +7,7 @@ import {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
+import { config } from '../../../config';
 import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
 import { commonProperties } from './commonProperties';
 
@@ -39,7 +40,7 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 			'X-WORKER-OCR-ENGINE': additionalFields?.['ocrEngine'] ?? '',
 		},
 		method: 'POST',
-		url: `https://worker.formextractorai.com/v2/extract`,
+		url: `${config.formxWorkerBaseUrl}/v2/extract`,
 	};
 	const response = await this.helpers.httpRequestWithAuthentication.call(
 		this,
