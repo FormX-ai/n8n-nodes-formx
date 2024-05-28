@@ -13,6 +13,7 @@ export enum ExtractionStatus {
 	All = 'all',
 }
 
+// TODO: use n8n webhook endpoint shcema
 export const registerWebhookRequestSchema = z.object({
 	zap_id: z.string(),
 	hook: z.string().url(),
