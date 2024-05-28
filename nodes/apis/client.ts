@@ -1,4 +1,9 @@
-import { IExecuteFunctions, IHttpRequestOptions, IN8nHttpFullResponse } from 'n8n-workflow';
+import {
+	IExecuteFunctions,
+	IHookFunctions,
+	IHttpRequestOptions,
+	IN8nHttpFullResponse,
+} from 'n8n-workflow';
 import { ZodSchema, ZodTypeDef } from 'zod';
 import { config } from '../config';
 import { handleExtractResponseError } from './parse';
@@ -18,6 +23,16 @@ import {
 	getAsyncResultV2ResponseSchema,
 	GetAsyncResultV2SuccessResponse,
 } from './schemas/getAsyncExtractResult';
+import {
+	RegisterWebhookRequest,
+	registerWebhookResponseSchema,
+	RegisterWebhookResponseSuccess,
+} from './schemas/registerWebhook';
+import {
+	UnregisterWebhookRequest,
+	unregisterWebhookResponseSchema,
+	UnregisterWebhookResponseSuccess,
+} from './schemas/unregisterWebhook';
 
 function responseParser<T>(rawJson: any, schema: ZodSchema<T, ZodTypeDef, any>): T {
 	try {
@@ -55,7 +70,7 @@ export async function syncExtract(
 	)) as IN8nHttpFullResponse;
 
 	const parsedResponse = responseParser(response.body, extractAPIv2ResponseSchema);
-	if (parsedResponse.status == 'failed') {
+	if (parsedResponse.status === 'failed') {
 		throw handleExtractResponseError(response.statusCode, response.body);
 	}
 
@@ -89,7 +104,7 @@ export async function asyncExtract(
 	)) as IN8nHttpFullResponse;
 
 	const parsedResponse = responseParser(response.body, asyncExtractAPIv2ResponseSchema);
-	if (parsedResponse.status == 'failed') {
+	if (parsedResponse.status === 'failed') {
 		throw handleExtractResponseError(response.statusCode, response.body);
 	}
 
@@ -124,7 +139,7 @@ export async function extractToWorkspace(
 	)) as IN8nHttpFullResponse;
 
 	const parsedResponse = responseParser(response.body, extractToWorksapceAPIv2ResponseSchema);
-	if (parsedResponse.status == 'failed') {
+	if (parsedResponse.status === 'failed') {
 		throw handleExtractResponseError(response.statusCode, response.body);
 	}
 
@@ -151,9 +166,71 @@ export async function getAsyncExtractionResult(
 	)) as IN8nHttpFullResponse;
 
 	const parsedResponse = responseParser(response.body, getAsyncResultV2ResponseSchema);
-	if (parsedResponse.status == 'failed') {
+	if (parsedResponse.status === 'failed') {
 		throw handleExtractResponseError(response.statusCode, response.body);
 	}
 
 	return parsedResponse;
+}
+
+// TODO: Connect to n8n webhook endpoint after implementation
+export async function registerWebhook(
+	this: IHookFunctions,
+	request: Partial<RegisterWebhookRequest>,
+): Promise<RegisterWebhookResponseSuccess> {
+	const requestOptions: IHttpRequestOptions = {
+		headers: {
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
+		},
+		method: 'POST',
+		url: `${config.formxApiBaseUrl}/zapier-webhook`,
+		body: {
+			// NOTE: Only support per document here
+			zap_id: 'TO BE REMOVE',
+			webhook_type: 'workspace:extraction-finished:per-document',
+			deliver_on: 'all',
+			...request,
+		},
+	};
+	const response = (await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'formXApi',
+		requestOptions,
+	)) as IN8nHttpFullResponse;
+
+	const parsedResponse = responseParser(response.body, registerWebhookResponseSchema);
+	if (parsedResponse.result.status === 'failed') {
+		throw handleExtractResponseError(response.statusCode, response.body);
+	}
+
+	return parsedResponse as RegisterWebhookResponseSuccess;
+}
+
+// TODO: Connect to n8n webhook endpoint after implementation
+export async function unregisterWebhook(
+	this: IHookFunctions,
+	request: UnregisterWebhookRequest,
+): Promise<UnregisterWebhookResponseSuccess> {
+	const requestOptions: IHttpRequestOptions = {
+		headers: {
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
+		},
+		method: 'DELETE',
+		url: `${config.formxApiBaseUrl}/zapier-webhook`,
+		body: request,
+	};
+	const response = (await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'formXApi',
+		requestOptions,
+	)) as IN8nHttpFullResponse;
+
+	const parsedResponse = responseParser(response.body, unregisterWebhookResponseSchema);
+	if (parsedResponse.result.status === 'failed') {
+		throw handleExtractResponseError(response.statusCode, response.body);
+	}
+
+	return parsedResponse as UnregisterWebhookResponseSuccess;
 }

@@ -2,6 +2,7 @@ import * as z from 'zod';
 import { formXAPIFailedResponseSchema } from './error';
 // ref https://github.com/FormX-ai/form-extractor/blob/master/formx/api/handlers/zapier_webhook.py#L51
 
+// TODO: use n8n webhook endpoint shcema
 export const unregisterWebhookRequestSchema = z.object({
 	workspace_webhook_id: z.string(),
 	secret: z.string(),
