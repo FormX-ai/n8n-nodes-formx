@@ -1,25 +1,15 @@
-/* eslint-disable n8n-nodes-base/node-param-display-name-miscased */
-import { IDisplayOptions, INodeProperties } from 'n8n-workflow';
-import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
+import { INodeProperties } from 'n8n-workflow';
 
-const operations: INodeProperties[] = [
+export const commonProperties = (
+	extraAdditionalFields: INodeProperties[] = [],
+): INodeProperties[] => [
 	{
 		displayName: 'Image URL',
 		name: 'imageUrl',
 		type: 'string',
-		routing: {
-			request: {
-				headers: {
-					'X-WORKER-IMAGE-URL': '={{$value}}',
-				},
-			},
-		},
 		default: '',
 		placeholder: 'https://formextractorai.com/sample-invoice-1.d551279a.jpg',
 	},
-];
-
-const additionalFields: INodeProperties[] = [
 	{
 		displayName: 'Additional Fields',
 		name: 'additionalFields',
@@ -45,13 +35,6 @@ const additionalFields: INodeProperties[] = [
 						value: 'multiple-documents-per-page',
 					},
 				],
-				routing: {
-					request: {
-						headers: {
-							'X-WORKER-PROCESSING-MODE': '={{$value}}',
-						},
-					},
-				},
 				default: 'per-page',
 			},
 			{
@@ -59,13 +42,6 @@ const additionalFields: INodeProperties[] = [
 				name: 'autoAdjustImageSize',
 				type: 'boolean',
 				default: true,
-				routing: {
-					request: {
-						headers: {
-							'X-WORKER-AUTO-ADJUST-IMAGE-SIZE': '={{$value}}',
-						},
-					},
-				},
 			},
 			{
 				displayName: 'Specify OCR Engine',
@@ -77,25 +53,18 @@ const additionalFields: INodeProperties[] = [
 						value: '',
 					},
 					{
-						name: 'google',
+						name: 'Google',
 						value: 'google',
 					},
 					{
-						name: 'azure',
+						name: 'Azure',
 						value: 'azure',
 					},
 					{
-						name: 'tesseract',
+						name: 'Tesseract',
 						value: 'tesseract',
 					},
 				],
-				routing: {
-					request: {
-						headers: {
-							'X-WORKER-OCR-ENGINE': '={{$value}}',
-						},
-					},
-				},
 				default: '',
 			},
 			{
@@ -103,25 +72,8 @@ const additionalFields: INodeProperties[] = [
 				name: 'pdfDpi',
 				type: 'number',
 				default: 150,
-				routing: {
-					request: {
-						headers: {
-							'X-WORKER-PDF-DPI': '={{$value}}',
-						},
-					},
-				},
 			},
+			...extraAdditionalFields,
 		],
 	},
 ];
-
-const properties: INodeProperties[] = [...operations, ...additionalFields];
-
-const displayOptions: IDisplayOptions = {
-	show: {
-		resource: ['extractor'],
-		operations: ['extractSync'],
-	},
-};
-
-export const description = updateDisplayOptions(displayOptions, properties);
