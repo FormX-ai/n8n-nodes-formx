@@ -7,7 +7,6 @@ import {
 	ExtractionScriptError,
 	ExtractorIDNotFoundError,
 	FileTooLargeError,
-	FormXAPIError,
 	ImageDimensionTooLargeError,
 	InferencerClientUnknownServerError,
 	InferencerInvalidResponseError,
@@ -31,7 +30,6 @@ import {
 	UndefinedCustomModelExtractorSchemaError,
 	UnknownExtractionError,
 	UnknownFormXAPIError,
-	UnrecognizedResponseError,
 	WorkspaceIDNotFoundError,
 	WorkspaceNotLinkedToExtractorError,
 } from './error';
@@ -146,29 +144,6 @@ export const throwOnExtractError = (
 	}
 };
 
-export const validateExtractResponse = (
-	statusCode: number,
-	responseBody: any, // TODO: type force json schema with Zod
-): void => {
-	if (!('status' in responseBody)) {
-		throw new UnrecognizedResponseError();
-	}
-
-	switch (responseBody.status) {
-		case 'ok':
-		case 'pending': {
-			return;
-		}
-		case 'failed': {
-			throwOnExtractError(statusCode, responseBody);
-			break;
-		}
-		default: {
-			throw new UnrecognizedResponseError();
-		}
-	}
-};
-
 export const handleExtractResponseError = (
 	statusCode: number,
 	responseBody: any, // TODO: type force json schema with Zod
@@ -190,4 +165,19 @@ export const handleExtractResponseError = (
 			throw new Error('Something wrong, please contact FormX support');
 		}
 	}
+};
+
+export const shouldRetryOnError = (err: unknown): boolean => {
+	if (err instanceof Error) {
+		switch (err.constructor) {
+			case UnknownExtractionError:
+			case ExtractionLLMError:
+			case InferencerClientUnknownServerError:
+			case InferencerInvalidResponseError:
+			case RecognizerError:
+				return true;
+		}
+	}
+
+	return false;
 };

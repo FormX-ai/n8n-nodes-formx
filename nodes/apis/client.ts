@@ -6,6 +6,7 @@ import {
 } from 'n8n-workflow';
 import { ZodSchema, ZodTypeDef } from 'zod';
 import { config } from '../config';
+import { UnrecognizedResponseError } from './error';
 import { handleExtractResponseError } from './parse';
 import { ExtractAPIv2RequestHeaderData } from './schemas/extract';
 import {
@@ -38,8 +39,8 @@ function responseParser<T>(rawJson: any, schema: ZodSchema<T, ZodTypeDef, any>):
 	try {
 		return schema.parse(rawJson);
 	} catch (err: unknown) {
-		console.log(rawJson);
-		throw err;
+		console.error(err);
+		throw new UnrecognizedResponseError();
 	}
 }
 
@@ -61,6 +62,7 @@ export async function syncExtract(
 		},
 		method: 'POST',
 		url: `${config.formxWorkerBaseUrl}/v2/extract`,
+		ignoreHttpStatusErrors: true,
 		returnFullResponse: true,
 	};
 	const response = (await this.helpers.httpRequestWithAuthentication.call(
@@ -95,6 +97,7 @@ export async function asyncExtract(
 		},
 		method: 'POST',
 		url: `${config.formxWorkerBaseUrl}/v2/extract`,
+		ignoreHttpStatusErrors: true,
 		returnFullResponse: true,
 	};
 	const response = (await this.helpers.httpRequestWithAuthentication.call(
@@ -130,6 +133,7 @@ export async function extractToWorkspace(
 		},
 		method: 'POST',
 		url: `${config.formxWorkerBaseUrl}/v2/workspace`,
+		ignoreHttpStatusErrors: true,
 		returnFullResponse: true,
 	};
 	const response = (await this.helpers.httpRequestWithAuthentication.call(
@@ -156,6 +160,7 @@ export async function getAsyncExtractionResult(
 		},
 		method: 'GET',
 		url: `${config.formxWorkerBaseUrl}/v2/extract/jobs/${jobId}`,
+		ignoreHttpStatusErrors: true,
 		returnFullResponse: true,
 	};
 
@@ -192,6 +197,8 @@ export async function registerWebhook(
 			deliver_on: 'all',
 			...request,
 		},
+		ignoreHttpStatusErrors: true,
+		returnFullResponse: true,
 	};
 	const response = (await this.helpers.httpRequestWithAuthentication.call(
 		this,
@@ -220,6 +227,8 @@ export async function unregisterWebhook(
 		method: 'DELETE',
 		url: `${config.formxApiBaseUrl}/zapier-webhook`,
 		body: request,
+		ignoreHttpStatusErrors: true,
+		returnFullResponse: true,
 	};
 	const response = (await this.helpers.httpRequestWithAuthentication.call(
 		this,
