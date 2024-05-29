@@ -10,15 +10,16 @@
 export const retry = async <T>(
 	fn: () => Promise<T> | T,
 	{ retries, retryIntervalMs }: { retries: number; retryIntervalMs: number },
+	condition?: () => boolean,
 ): Promise<T> => {
 	try {
 		return await fn();
 	} catch (error) {
-		if (retries <= 0) {
+		if (retries <= 0 || condition?.() === false) {
 			throw error;
 		}
 		await sleep(retryIntervalMs);
-		return retry(fn, { retries: retries - 1, retryIntervalMs });
+		return retry(fn, { retries: retries - 1, retryIntervalMs }, condition);
 	}
 };
 

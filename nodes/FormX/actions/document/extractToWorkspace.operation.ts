@@ -7,6 +7,7 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 import { extractToWorkspace, getAsyncExtractionResult } from '../../../apis/client';
+import { shouldRetryOnError } from '../../../apis/parse';
 import { ExtractToWorkspaceAPIv2RequestHeaderData } from '../../../apis/schemas/extractToWorkspace';
 import { retry } from '../../../utils/retry';
 import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
@@ -48,11 +49,23 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	});
 	const additionalFields = this.getNodeParameter('additionalFields', i, {}) as Record<string, any>;
 
-	const response = await extractToWorkspace.call(this, {
-		imageUrl: imageUrl,
-		workspaceId: workspaceId,
-		...additionalFields,
-	} as ExtractToWorkspaceAPIv2RequestHeaderData);
+	let error: unknown;
+	const response = await retry(
+		async () => {
+			try {
+				return await extractToWorkspace.call(this, {
+					imageUrl: imageUrl,
+					workspaceId: workspaceId,
+					...additionalFields,
+				} as ExtractToWorkspaceAPIv2RequestHeaderData);
+			} catch (err) {
+				error = err;
+				throw err;
+			}
+		},
+		{ retries: 5, retryIntervalMs: 5000 },
+		() => shouldRetryOnError(error),
+	);
 
 	const jobId = response.job_id;
 

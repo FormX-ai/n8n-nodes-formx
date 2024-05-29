@@ -7,7 +7,9 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 import { syncExtract } from '../../../apis/client';
+import { shouldRetryOnError } from '../../../apis/parse';
 import { ExtractAPIv2RequestHeaderData } from '../../../apis/schemas/extract';
+import { retry } from '../../../utils/retry';
 import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
 import { commonProperties } from './commonProperties';
 
@@ -25,10 +27,22 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const imageUrl = this.getNodeParameter('imageUrl', i, undefined);
 	const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
 
-	const response = await syncExtract.call(this, {
-		imageUrl: imageUrl,
-		...additionalFields,
-	} as ExtractAPIv2RequestHeaderData);
+	let error: unknown;
+	const response = await retry(
+		async () => {
+			try {
+				return await syncExtract.call(this, {
+					imageUrl: imageUrl,
+					...additionalFields,
+				} as ExtractAPIv2RequestHeaderData);
+			} catch (err) {
+				error = err;
+				throw err;
+			}
+		},
+		{ retries: 5, retryIntervalMs: 5000 },
+		() => shouldRetryOnError(error),
+	);
 	const executionData = this.helpers.constructExecutionMetaData(
 		this.helpers.returnJsonArray(response),
 		{ itemData: { item: i } },

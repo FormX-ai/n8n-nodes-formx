@@ -8,10 +8,11 @@ import {
 import { config } from '../config';
 import { deleteWebhookInfo, saveWebhookInfo } from './webhook';
 import { registerWebhook, unregisterWebhook } from '../apis/client';
-import { handleExtractResponseError } from '../apis/parse';
+import { shouldRetryOnError } from '../apis/parse';
 import { RegisterWebhookRequest } from '../apis/schemas/registerWebhook';
 import { UnregisterWebhookRequest } from '../apis/schemas/unregisterWebhook';
 import { workspaceWebhookResponseSchema } from '../apis/schemas/workspaceWebhook';
+import { retry } from '../utils/retry';
 
 export class FormXTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -112,20 +113,32 @@ export class FormXTrigger implements INodeType {
 
 				const deliverOn = additionalFields?.['deliverOn'];
 				const credentials = await this.getCredentials('formXApi');
-				const response = await registerWebhook.call(this, {
-					hook: webhookUrl,
-					workspace_id: workspaceId,
-					worker_token: credentials.accessToken,
-					deliver_on: deliverOn,
-					...additionalFields,
-					/* NOTE: There's an optional field `should_include_extraction_result`, Team agreed it is not useful to users.
-					 * >>> Default to true. false to skip sending documents[] or document to reduce webhook payload size.
-					 * Suggest DONT expose, coz that case user will need to curl the payload_url again, which violates the assumption that
-					 * - user is not familiar with technical stuff
-					 * - user wants as few steps in zapier as possible
-					 * ref https://github.com/FormX-ai/form-extractor/blob/master/docs/workspace_webhook.md#register-webhook
-					 * ref https://oursky.slack.com/archives/CBY13P2R0/p1715582553600359 */
-				} as Partial<RegisterWebhookRequest>);
+				let error: unknown;
+				const response = await retry(
+					async () => {
+						try {
+							return await registerWebhook.call(this, {
+								hook: webhookUrl,
+								workspace_id: workspaceId,
+								worker_token: credentials.accessToken,
+								deliver_on: deliverOn,
+								...additionalFields,
+								/* NOTE: There's an optional field `should_include_extraction_result`, Team agreed it is not useful to users.
+								 * >>> Default to true. false to skip sending documents[] or document to reduce webhook payload size.
+								 * Suggest DONT expose, coz that case user will need to curl the payload_url again, which violates the assumption that
+								 * - user is not familiar with technical stuff
+								 * - user wants as few steps in zapier as possible
+								 * ref https://github.com/FormX-ai/form-extractor/blob/master/docs/workspace_webhook.md#register-webhook
+								 * ref https://oursky.slack.com/archives/CBY13P2R0/p1715582553600359 */
+							} as Partial<RegisterWebhookRequest>);
+						} catch (err) {
+							error = err;
+							throw err;
+						}
+					},
+					{ retries: 5, retryIntervalMs: 5000 },
+					() => shouldRetryOnError(error),
+				);
 				const result = response.result;
 				saveWebhookInfo.call(this, {
 					webhookId: result.workspace_webhook_id as string,
@@ -138,10 +151,22 @@ export class FormXTrigger implements INodeType {
 				const webhookData = this.getWorkflowStaticData('node');
 
 				if (webhookData.webhookId !== undefined) {
-					unregisterWebhook.call(this, {
-						workspace_webhook_id: webhookData.webhookId,
-						secret: webhookData.secret,
-					} as UnregisterWebhookRequest);
+					let error: unknown;
+					await retry(
+						async () => {
+							try {
+								return unregisterWebhook.call(this, {
+									workspace_webhook_id: webhookData.webhookId,
+									secret: webhookData.secret,
+								} as UnregisterWebhookRequest);
+							} catch (err) {
+								error = err;
+								throw err;
+							}
+						},
+						{ retries: 5, retryIntervalMs: 5000 },
+						() => shouldRetryOnError(error),
+					);
 
 					deleteWebhookInfo.call(this);
 				}
