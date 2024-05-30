@@ -1,14 +1,17 @@
 import {
-	IHttpRequestOptions,
-	type IDataObject,
 	type IHookFunctions,
 	type INodeType,
 	type INodeTypeDescription,
 	type IWebhookFunctions,
 	type IWebhookResponseData,
 } from 'n8n-workflow';
-import { config } from '../config';
 import { deleteWebhookInfo, saveWebhookInfo } from './webhook';
+import { checkIfWebhookExists, registerWebhook, unregisterWebhook } from '../apis/client';
+import { shouldRetryOnError } from '../apis/parse';
+import { RegisterWebhookRequest } from '../apis/schemas/registerWebhook';
+import { UnregisterWebhookRequest } from '../apis/schemas/unregisterWebhook';
+import { workspaceWebhookResponseSchema } from '../apis/schemas/workspaceWebhook';
+import { retry } from '../utils/retry';
 
 export class FormXTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -95,13 +98,35 @@ export class FormXTrigger implements INodeType {
 
 	webhookMethods = {
 		default: {
-			// TODO: Requires implementation of check if webhook url exitst endpoint
 			async checkExists(this: IHookFunctions): Promise<boolean> {
+				const webhookData = this.getWorkflowStaticData('node');
+				const credentials = await this.getCredentials('formXApi');
+				if (webhookData.webhookId != null) {
+					let error: unknown;
+					const response = await retry(
+						async () => {
+							try {
+								return await checkIfWebhookExists.call(this, {
+									worker_token: credentials.accessToken as string,
+									workspace_webhook_id: webhookData.webhookId as string,
+								});
+							} catch (err) {
+								error = err;
+								throw err;
+							}
+						},
+						{ retries: 5, retryIntervalMs: 5000 },
+						() => shouldRetryOnError(error),
+					);
+
+					return response.result.exists;
+				}
+
 				return false;
 			},
 			async create(this: IHookFunctions): Promise<boolean> {
 				const webhookUrl = this.getNodeWebhookUrl('default');
-				const workspaceId = this.getNodeParameter('workspaceId', []);
+				const workspaceId = this.getNodeParameter('workspaceId');
 				const additionalFields = this.getNodeParameter('additionalFields', []) as Record<
 					string,
 					any
@@ -109,45 +134,36 @@ export class FormXTrigger implements INodeType {
 
 				const deliverOn = additionalFields?.['deliverOn'];
 				const credentials = await this.getCredentials('formXApi');
-				// TODO: Connect to n8n webhook endpoint after implementation
-				const requestOptions: IHttpRequestOptions = {
-					headers: {
-						Accept: 'application/json',
-						'Content-Type': 'application/json',
+				let error: unknown;
+				const response = await retry(
+					async () => {
+						try {
+							return await registerWebhook.call(this, {
+								hook: webhookUrl,
+								workspace_id: workspaceId,
+								worker_token: credentials.accessToken,
+								deliver_on: deliverOn,
+								/* NOTE: There's an optional field `should_include_extraction_result`, Team agreed it is not useful to users.
+								 * >>> Default to true. false to skip sending documents[] or document to reduce webhook payload size.
+								 * Suggest DONT expose, coz that case user will need to curl the payload_url again, which violates the assumption that
+								 * - user is not familiar with technical stuff
+								 * - user wants as few steps in zapier as possible
+								 * ref https://github.com/FormX-ai/form-extractor/blob/master/docs/workspace_webhook.md#register-webhook
+								 * ref https://oursky.slack.com/archives/CBY13P2R0/p1715582553600359 */
+							} as Partial<RegisterWebhookRequest>);
+						} catch (err) {
+							error = err;
+							throw err;
+						}
 					},
-					method: 'POST',
-					url: `${config.formxApiBaseUrl}/zapier-webhook`,
-					body: {
-						zap_id: 'TO BE REMOVE',
-						hook: webhookUrl,
-						workspace_id: workspaceId,
-						worker_token: credentials.accessToken,
-						webhook_type: 'workspace:extraction-finished:per-document',
-						deliver_on: deliverOn ?? 'all',
-						/* NOTE: There's an optional field `should_include_extraction_result`, Team agreed it is not useful to users.
-						 * >>> Default to true. false to skip sending documents[] or document to reduce webhook payload size.
-						 * Suggest DONT expose, coz that case user will need to curl the payload_url again, which violates the assumption that
-						 * - user is not familiar with technical stuff
-						 * - user wants as few steps in zapier as possible
-						 * ref https://github.com/FormX-ai/form-extractor/blob/master/docs/workspace_webhook.md#register-webhook
-						 * ref https://oursky.slack.com/archives/CBY13P2R0/p1715582553600359 */
-					},
-				};
-				try {
-					const response = (await this.helpers.httpRequestWithAuthentication.call(
-						this,
-						'formXApi',
-						requestOptions,
-					)) as IDataObject;
-					const result = response.result as IDataObject;
-					saveWebhookInfo.call(this, {
-						webhookId: result.workspace_webhook_id as string,
-						secret: result.secret as string,
-					});
-				} catch (e) {
-					console.error(e);
-					throw e;
-				}
+					{ retries: 5, retryIntervalMs: 5000 },
+					() => shouldRetryOnError(error),
+				);
+				const result = response.result;
+				saveWebhookInfo.call(this, {
+					webhookId: result.workspace_webhook_id as string,
+					secret: result.secret as string,
+				});
 
 				return true;
 			},
@@ -155,29 +171,22 @@ export class FormXTrigger implements INodeType {
 				const webhookData = this.getWorkflowStaticData('node');
 
 				if (webhookData.webhookId !== undefined) {
-					// TODO: Connect to n8n webhook endpoint after implementation
-					const requestOptions: IHttpRequestOptions = {
-						headers: {
-							Accept: 'application/json',
-							'Content-Type': 'application/json',
+					let error: unknown;
+					await retry(
+						async () => {
+							try {
+								return unregisterWebhook.call(this, {
+									workspace_webhook_id: webhookData.webhookId,
+									secret: webhookData.secret,
+								} as UnregisterWebhookRequest);
+							} catch (err) {
+								error = err;
+								throw err;
+							}
 						},
-						method: 'DELETE',
-						url: `${config.formxApiBaseUrl}/zapier-webhook`,
-						body: {
-							workspace_webhook_id: webhookData.webhookId,
-							secret: webhookData.secret,
-						},
-					};
-					try {
-						(await this.helpers.httpRequestWithAuthentication.call(
-							this,
-							'formXApi',
-							requestOptions,
-						)) as IDataObject;
-					} catch (e) {
-						console.error(e);
-						throw e;
-					}
+						{ retries: 5, retryIntervalMs: 5000 },
+						() => shouldRetryOnError(error),
+					);
 
 					deleteWebhookInfo.call(this);
 				}
@@ -189,9 +198,10 @@ export class FormXTrigger implements INodeType {
 
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		const bodyData = this.getBodyData();
+		const parsedResponse = workspaceWebhookResponseSchema.parse(bodyData);
 
 		return {
-			workflowData: [this.helpers.returnJsonArray(bodyData)],
+			workflowData: [this.helpers.returnJsonArray(parsedResponse)],
 		};
 	}
 }

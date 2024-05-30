@@ -1,14 +1,13 @@
 /* eslint-disable n8n-nodes-base/node-param-display-name-miscased */
 import {
-	IDataObject,
 	IDisplayOptions,
 	IExecuteFunctions,
-	IHttpRequestOptions,
-	IN8nHttpFullResponse,
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
-import { config } from '../../../config';
+import { asyncExtract, getAsyncExtractionResult } from '../../../apis/client';
+import { shouldRetryOnError } from '../../../apis/parse';
+import { ExtractAPIv2RequestHeaderData } from '../../../apis/schemas/extract';
 import { retry } from '../../../utils/retry';
 import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
 import { commonProperties } from './commonProperties';
@@ -29,49 +28,31 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	});
 	const additionalFields = this.getNodeParameter('additionalFields', i, {}) as Record<string, any>;
 
-	const requestOptions: IHttpRequestOptions = {
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-			'X-WORKER-ASYNC': 'true',
-			'X-WORKER-ENCODING': 'raw',
-			'X-WORKER-IMAGE-URL': imageUrl,
-			'X-WORKER-PDF-DPI': '150',
-			'X-WORKER-PROCESSING-MODE': additionalFields?.['processingMode'] ?? 'per-page',
-			'X-WORKER-AUTO-ADJUST-IMAGE-SIZE': additionalFields?.['autoAdjustImageSize'] ?? true,
-			'X-WORKER-OCR-ENGINE': additionalFields?.['ocrEngine'] ?? '',
+	let error: unknown;
+	const response = await retry(
+		async () => {
+			try {
+				return await asyncExtract.call(this, {
+					imageUrl: imageUrl,
+					...additionalFields,
+				} as ExtractAPIv2RequestHeaderData);
+			} catch (err) {
+				error = err;
+				throw err;
+			}
 		},
-		method: 'POST',
-		url: `${config.formxWorkerBaseUrl}/v2/extract`,
-	};
-
-	const response = (await this.helpers.httpRequestWithAuthentication.call(
-		this,
-		'formXApi',
-		requestOptions,
-	)) as IDataObject;
+		{ retries: 5, retryIntervalMs: 5000 },
+		() => shouldRetryOnError(error),
+	);
 
 	const jobId = response.job_id;
-	let getResultResponse: IN8nHttpFullResponse | null = null;
 
 	// Polling to get result until it's ready / timeout
 	const result = await retry(
 		async () => {
-			const requestOptions: IHttpRequestOptions = {
-				headers: {
-					Accept: 'application/json',
-				},
-				method: 'GET',
-				url: `${config.formxWorkerBaseUrl}/v2/extract/jobs/${jobId}`,
-				returnFullResponse: true,
-			};
-			getResultResponse = (await this.helpers.httpRequestWithAuthentication.call(
-				this,
-				'formXApi',
-				requestOptions,
-			)) as IN8nHttpFullResponse;
-			if (getResultResponse.statusCode !== 201) {
-				return getResultResponse.body;
+			const response = await getAsyncExtractionResult.call(this, jobId);
+			if (response.status === 'ok') {
+				return response;
 			} else {
 				throw Error('Extraction result not ready');
 			}
@@ -80,7 +61,7 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	);
 
 	const executionData = this.helpers.constructExecutionMetaData(
-		this.helpers.returnJsonArray(result as IDataObject[]),
+		this.helpers.returnJsonArray(result),
 		{ itemData: { item: i } },
 	);
 

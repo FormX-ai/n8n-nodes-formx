@@ -3,11 +3,13 @@ import {
 	IDataObject,
 	IDisplayOptions,
 	IExecuteFunctions,
-	IHttpRequestOptions,
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
-import { config } from '../../../config';
+import { syncExtract } from '../../../apis/client';
+import { shouldRetryOnError } from '../../../apis/parse';
+import { ExtractAPIv2RequestHeaderData } from '../../../apis/schemas/extract';
+import { retry } from '../../../utils/retry';
 import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
 import { commonProperties } from './commonProperties';
 
@@ -22,33 +24,27 @@ const syncDisplayOptions: IDisplayOptions = {
 export const description = updateDisplayOptions(syncDisplayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
-	const imageUrl = this.getNodeParameter('imageUrl', i, undefined, {
-		extractValue: true,
-	});
-	const additionalFields = this.getNodeParameter('additionalFields', i, {}) as Record<string, any>;
+	const imageUrl = this.getNodeParameter('imageUrl', i, undefined);
+	const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
 
-	const requestOptions: IHttpRequestOptions = {
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-			'X-WORKER-ASYNC': 'false',
-			'X-WORKER-ENCODING': 'raw',
-			'X-WORKER-IMAGE-URL': imageUrl,
-			'X-WORKER-PDF-DPI': '150',
-			'X-WORKER-PROCESSING-MODE': additionalFields?.['processingMode'] ?? 'per-page',
-			'X-WORKER-AUTO-ADJUST-IMAGE-SIZE': additionalFields?.['autoAdjustImageSize'] ?? true,
-			'X-WORKER-OCR-ENGINE': additionalFields?.['ocrEngine'] ?? '',
+	let error: unknown;
+	const response = await retry(
+		async () => {
+			try {
+				return await syncExtract.call(this, {
+					imageUrl: imageUrl,
+					...additionalFields,
+				} as ExtractAPIv2RequestHeaderData);
+			} catch (err) {
+				error = err;
+				throw err;
+			}
 		},
-		method: 'POST',
-		url: `${config.formxWorkerBaseUrl}/v2/extract`,
-	};
-	const response = await this.helpers.httpRequestWithAuthentication.call(
-		this,
-		'formXApi',
-		requestOptions,
+		{ retries: 5, retryIntervalMs: 5000 },
+		() => shouldRetryOnError(error),
 	);
 	const executionData = this.helpers.constructExecutionMetaData(
-		this.helpers.returnJsonArray(response as IDataObject[]),
+		this.helpers.returnJsonArray(response),
 		{ itemData: { item: i } },
 	);
 
