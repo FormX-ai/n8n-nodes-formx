@@ -8,6 +8,11 @@ import { ZodSchema, ZodTypeDef } from 'zod';
 import { config } from '../config';
 import { UnrecognizedResponseError } from './error';
 import { handleExtractResponseError } from './parse';
+import {
+	checkIfExistsWebhookResponseSchema,
+	CheckIfExistWebhookRequest,
+	CheckIfExistWebhookResponseSuccess,
+} from './schemas/checkIfExistsWebhook';
 import { ExtractAPIv2RequestHeaderData } from './schemas/extract';
 import {
 	asyncExtractAPIv2ResponseSchema,
@@ -238,4 +243,33 @@ export async function unregisterWebhook(
 	}
 
 	return parsedResponse as UnregisterWebhookResponseSuccess;
+}
+
+export async function checkIfWebhookExists(
+	this: IHookFunctions,
+	request: CheckIfExistWebhookRequest,
+): Promise<CheckIfExistWebhookResponseSuccess> {
+	const requestOptions: IHttpRequestOptions = {
+		headers: {
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
+		},
+		method: 'POST',
+		url: `${config.formxApiBaseUrl}/n8n-is-webhook-exists`,
+		body: request,
+		ignoreHttpStatusErrors: true,
+		returnFullResponse: true,
+	};
+	const response = (await this.helpers.httpRequestWithAuthentication.call(
+		this,
+		'formXApi',
+		requestOptions,
+	)) as IN8nHttpFullResponse;
+
+	const parsedResponse = responseParser(response.body, checkIfExistsWebhookResponseSchema);
+	if (parsedResponse.result.status === 'failed') {
+		throw handleExtractResponseError(response.statusCode, response.body);
+	}
+
+	return parsedResponse as CheckIfExistWebhookResponseSuccess;
 }

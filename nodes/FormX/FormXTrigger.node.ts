@@ -5,9 +5,8 @@ import {
 	type IWebhookFunctions,
 	type IWebhookResponseData,
 } from 'n8n-workflow';
-import { config } from '../config';
 import { deleteWebhookInfo, saveWebhookInfo } from './webhook';
-import { registerWebhook, unregisterWebhook } from '../apis/client';
+import { checkIfWebhookExists, registerWebhook, unregisterWebhook } from '../apis/client';
 import { shouldRetryOnError } from '../apis/parse';
 import { RegisterWebhookRequest } from '../apis/schemas/registerWebhook';
 import { UnregisterWebhookRequest } from '../apis/schemas/unregisterWebhook';
@@ -99,8 +98,30 @@ export class FormXTrigger implements INodeType {
 
 	webhookMethods = {
 		default: {
-			// TODO: Requires implementation of check if webhook url exitst endpoint
 			async checkExists(this: IHookFunctions): Promise<boolean> {
+				const webhookData = this.getWorkflowStaticData('node');
+				const credentials = await this.getCredentials('formXApi');
+				if (webhookData.webhookId != null) {
+					let error: unknown;
+					const response = await retry(
+						async () => {
+							try {
+								return await checkIfWebhookExists.call(this, {
+									worker_token: credentials.accessToken as string,
+									workspace_webhook_id: webhookData.webhookId as string,
+								});
+							} catch (err) {
+								error = err;
+								throw err;
+							}
+						},
+						{ retries: 5, retryIntervalMs: 5000 },
+						() => shouldRetryOnError(error),
+					);
+
+					return response.result.exists;
+				}
+
 				return false;
 			},
 			async create(this: IHookFunctions): Promise<boolean> {
