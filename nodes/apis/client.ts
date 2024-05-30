@@ -178,7 +178,6 @@ export async function getAsyncExtractionResult(
 	return parsedResponse;
 }
 
-// TODO: Connect to n8n webhook endpoint after implementation
 export async function registerWebhook(
 	this: IHookFunctions,
 	request: Partial<RegisterWebhookRequest>,
@@ -189,13 +188,11 @@ export async function registerWebhook(
 			'Content-Type': 'application/json',
 		},
 		method: 'POST',
-		url: `${config.formxApiBaseUrl}/zapier-webhook`,
+		url: `${config.formxApiBaseUrl}/n8n-register-webhook`,
 		body: {
-			// NOTE: Only support per document here
-			zap_id: 'TO BE REMOVE',
-			webhook_type: 'workspace:extraction-finished:per-document',
-			deliver_on: 'all',
 			...request,
+			webhook_type: 'workspace:extraction-finished:per-document',
+			deliver_on: request.deliver_on ?? 'all',
 		},
 		ignoreHttpStatusErrors: true,
 		returnFullResponse: true,
@@ -214,7 +211,6 @@ export async function registerWebhook(
 	return parsedResponse as RegisterWebhookResponseSuccess;
 }
 
-// TODO: Connect to n8n webhook endpoint after implementation
 export async function unregisterWebhook(
 	this: IHookFunctions,
 	request: UnregisterWebhookRequest,
@@ -224,8 +220,8 @@ export async function unregisterWebhook(
 			Accept: 'application/json',
 			'Content-Type': 'application/json',
 		},
-		method: 'DELETE',
-		url: `${config.formxApiBaseUrl}/zapier-webhook`,
+		method: 'POST',
+		url: `${config.formxApiBaseUrl}/n8n-unregister-webhook`,
 		body: request,
 		ignoreHttpStatusErrors: true,
 		returnFullResponse: true,

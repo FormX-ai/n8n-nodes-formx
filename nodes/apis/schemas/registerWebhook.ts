@@ -13,14 +13,12 @@ export enum ExtractionStatus {
 	All = 'all',
 }
 
-// TODO: use n8n webhook endpoint shcema
 export const registerWebhookRequestSchema = z.object({
-	zap_id: z.string(),
 	hook: z.string().url(),
 	workspace_id: z.string(),
 	worker_token: z.string(),
-	webhook_type: z.nativeEnum(WebhookType), // no default value
-	deliver_on: z.nativeEnum(ExtractionStatus), // no default value
+	webhook_type: z.nativeEnum(WebhookType),
+	deliver_on: z.nativeEnum(ExtractionStatus),
 	should_include_extraction_result: z.boolean().optional(),
 });
 

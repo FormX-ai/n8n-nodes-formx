@@ -122,7 +122,6 @@ export class FormXTrigger implements INodeType {
 								workspace_id: workspaceId,
 								worker_token: credentials.accessToken,
 								deliver_on: deliverOn,
-								...additionalFields,
 								/* NOTE: There's an optional field `should_include_extraction_result`, Team agreed it is not useful to users.
 								 * >>> Default to true. false to skip sending documents[] or document to reduce webhook payload size.
 								 * Suggest DONT expose, coz that case user will need to curl the payload_url again, which violates the assumption that
