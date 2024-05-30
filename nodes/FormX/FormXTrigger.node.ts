@@ -8,6 +8,7 @@ import {
 	type IWebhookResponseData,
 } from 'n8n-workflow';
 import { config } from '../config';
+import { deleteWebhookInfo, saveWebhookInfo } from './webhook';
 
 export class FormXTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -139,9 +140,10 @@ export class FormXTrigger implements INodeType {
 						requestOptions,
 					)) as IDataObject;
 					const result = response.result as IDataObject;
-					const webhookData = this.getWorkflowStaticData('node');
-					webhookData.webhookId = result.workspace_webhook_id;
-					webhookData.secret = result.secret;
+					saveWebhookInfo.call(this, {
+						webhookId: result.workspace_webhook_id as string,
+						secret: result.secret as string,
+					});
 				} catch (e) {
 					console.error(e);
 					throw e;
@@ -177,10 +179,7 @@ export class FormXTrigger implements INodeType {
 						throw e;
 					}
 
-					// Remove from the static workflow data so that it is clear
-					// that no webhooks are registered anymore
-					delete webhookData.webhookId;
-					delete webhookData.secret;
+					deleteWebhookInfo.call(this);
 				}
 
 				return true;
