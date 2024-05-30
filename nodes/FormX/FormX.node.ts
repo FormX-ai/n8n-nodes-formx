@@ -5,7 +5,7 @@ import { router } from './actions/router';
 export class FormX implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'FormX',
-		name: 'FormX',
+		name: 'formX',
 		// TODO: Ask for clearer official formx.svg
 		// eslint-disable-next-line n8n-nodes-base/node-class-description-icon-not-svg
 		icon: 'file:formx.png',
