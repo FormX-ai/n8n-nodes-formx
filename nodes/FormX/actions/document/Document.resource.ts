@@ -2,6 +2,7 @@ import { INodeProperties } from 'n8n-workflow';
 import * as syncExtract from './syncExtract.operation';
 import * as asyncExtract from './asyncExtract.operation';
 import * as extractToWorkspace from './extractToWorkspace.operation';
+import * as getAsyncResult from './getAsyncResult.operation';
 
 export { syncExtract, asyncExtract, extractToWorkspace };
 
@@ -71,6 +72,17 @@ export const description: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				name: 'Get Async Job Result',
+				value: 'getAsyncResult',
+				description: 'Get result of async job',
+				action: 'Get result of async job',
+				routing: {
+					request: {
+						method: 'GET',
+					},
+				},
+			},
 		],
 		default: 'syncExtract',
 		displayOptions: {
@@ -82,4 +94,5 @@ export const description: INodeProperties[] = [
 	...syncExtract.description,
 	...asyncExtract.description,
 	...extractToWorkspace.description,
+	...getAsyncResult.description,
 ];
