@@ -4,11 +4,13 @@ export const commonProperties = (
 	extraAdditionalFields: INodeProperties[] = [],
 ): INodeProperties[] => [
 	{
-		displayName: 'Image URL',
-		name: 'imageUrl',
+		displayName: 'Binary Data Field',
+		name: 'binaryDataField',
 		type: 'string',
-		default: '',
-		placeholder: 'https://formextractorai.com/sample-invoice-1.d551279a.jpg',
+		default: 'data',
+		hint: 'The name of the input field containing the binary file data to be processed',
+		placeholder: 'e.g. data',
+		description: 'Name of the binary property which contains the file',
 	},
 	{
 		displayName: 'Additional Fields',
@@ -17,6 +19,13 @@ export const commonProperties = (
 		default: {},
 		placeholder: 'Add Field',
 		options: [
+			{
+				displayName: 'Image URL',
+				name: 'imageUrl',
+				type: 'string',
+				default: '',
+				placeholder: 'https://formextractorai.com/sample-invoice-1.d551279a.jpg',
+			},
 			{
 				displayName: 'Processing Mode',
 				name: 'processingMode',
