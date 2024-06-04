@@ -3,6 +3,11 @@ import * as syncExtract from './syncExtract.operation';
 import * as asyncExtract from './asyncExtract.operation';
 import * as extractToWorkspace from './extractToWorkspace.operation';
 import * as getAsyncResult from './getAsyncResult.operation';
+import { extractAPIv2ResponseSchema } from '../../../apis/schemas/extractSync';
+import { extractionResponseParserFactory } from '../../../apis/parse';
+import { asyncExtractAPIv2ResponseSchema } from '../../../apis/schemas/extractAsync';
+import { extractToWorksapceAPIv2ResponseSchema } from '../../../apis/schemas/extractToWorkspace';
+import { getAsyncResultV2ResponseSchema } from '../../../apis/schemas/getAsyncExtractResult';
 
 export { syncExtract, asyncExtract, extractToWorkspace };
 
@@ -19,6 +24,9 @@ export const description: INodeProperties[] = [
 				description: 'Extract document',
 				action: 'Extract document',
 				routing: {
+					output: {
+						postReceive: [extractionResponseParserFactory(extractAPIv2ResponseSchema)],
+					},
 					request: {
 						method: 'POST',
 						url: '/v2/extract',
@@ -39,6 +47,9 @@ export const description: INodeProperties[] = [
 				description: 'Async Extract document',
 				action: 'Async extract document',
 				routing: {
+					output: {
+						postReceive: [extractionResponseParserFactory(asyncExtractAPIv2ResponseSchema)],
+					},
 					request: {
 						method: 'POST',
 						url: '/v2/extract',
@@ -59,10 +70,14 @@ export const description: INodeProperties[] = [
 				description: 'Extract document to workspace',
 				action: 'Extract document to workspace',
 				routing: {
+					output: {
+						postReceive: [extractionResponseParserFactory(extractToWorksapceAPIv2ResponseSchema)],
+					},
 					request: {
 						method: 'POST',
 						url: '/v2/extract',
 						headers: {
+							'X-WORKER-ASYNC': 'true',
 							'X-WORKER-ENCODING': 'raw',
 							// default headers to be overridden by optional fields
 							'X-WORKER-AUTO-ADJUST-IMAGE-SIZE': 'true',
@@ -78,6 +93,9 @@ export const description: INodeProperties[] = [
 				description: 'Get result of async job',
 				action: 'Get result of async job',
 				routing: {
+					output: {
+						postReceive: [extractionResponseParserFactory(getAsyncResultV2ResponseSchema)],
+					},
 					request: {
 						method: 'GET',
 					},
