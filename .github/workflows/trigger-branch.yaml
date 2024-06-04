@@ -1,0 +1,12 @@
+name: Run CI
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+on:
+  push:
+    branches:
+      - master
+jobs:
+  ci-n8n:
+    uses: ./.github/workflows/ci-n8n.yaml
+    secrets: inherit

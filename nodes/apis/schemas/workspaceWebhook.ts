@@ -1,7 +1,7 @@
 // ref https://github.com/FormX-ai/form-extractor/blob/master/docs/workspace_webhook.md#webhook-payload
 
 import * as z from 'zod';
-import { documentSuccessSchema, documentErrorSchema } from './document';
+import { documentErrorSchema, documentSuccessSchema } from './document';
 
 export const workspaceWebhookSuccessResponseSchema = documentSuccessSchema.extend({
 	status: z.literal('ok'),

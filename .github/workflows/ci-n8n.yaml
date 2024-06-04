@@ -1,0 +1,17 @@
+name: CI for n8n
+on:
+  workflow_call:
+jobs:
+  ci:
+    name: Run CI for n8n
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.18.2
+      - name: Install npm package
+        run: npm install
+      - name: Run CI Check
+        run: make ci

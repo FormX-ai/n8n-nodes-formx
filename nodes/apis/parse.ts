@@ -30,10 +30,18 @@ import {
 	UndefinedCustomModelExtractorSchemaError,
 	UnknownExtractionError,
 	UnknownFormXAPIError,
+	UnrecognizedResponseError,
 	WorkspaceIDNotFoundError,
 	WorkspaceNotLinkedToExtractorError,
 } from './error';
 import { FormXErrorCode } from './schemas/error';
+import { ZodSchema, ZodTypeDef } from 'zod';
+import {
+	IExecuteSingleFunctions,
+	IN8nHttpFullResponse,
+	INodeExecutionData,
+	PostReceiveAction,
+} from 'n8n-workflow';
 
 export const throwOnExtractError = (
 	statusCode: number,
@@ -176,8 +184,32 @@ export const shouldRetryOnError = (err: unknown): boolean => {
 			case InferencerInvalidResponseError:
 			case RecognizerError:
 				return true;
+			default:
+				return false;
 		}
 	}
 
 	return false;
 };
+
+export function extractionResponseParserFactory<T extends { status: 'ok' | 'failed' | 'pending' }>(
+	schema: ZodSchema<T, ZodTypeDef, any>,
+): PostReceiveAction {
+	return async function (
+		this: IExecuteSingleFunctions,
+		items: INodeExecutionData[],
+		response: IN8nHttpFullResponse,
+	) {
+		let parsedResponse;
+		try {
+			parsedResponse = schema.parse(response.body);
+		} catch (e) {
+			throw new UnrecognizedResponseError();
+		}
+		if (parsedResponse.status === 'failed') {
+			throw handleExtractResponseError(response.statusCode, response.body);
+		}
+
+		return items;
+	};
+}

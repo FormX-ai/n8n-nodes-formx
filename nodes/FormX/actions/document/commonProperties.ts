@@ -1,4 +1,28 @@
-import { INodeProperties } from 'n8n-workflow';
+import {
+	IExecuteSingleFunctions,
+	IHttpRequestOptions,
+	INodeProperties,
+	NodeOperationError,
+} from 'n8n-workflow';
+
+export async function getImageBinaryData(
+	this: IExecuteSingleFunctions,
+	requestOptions: IHttpRequestOptions,
+): Promise<IHttpRequestOptions> {
+	try {
+		const binaryDataField = this.getNodeParameter('binaryDataField');
+
+		let dataBuffer: Buffer | null = null;
+		if (binaryDataField && this.helpers.assertBinaryData(binaryDataField)) {
+			dataBuffer = await this.helpers.getBinaryDataBuffer(binaryDataField);
+		}
+		requestOptions.body = dataBuffer;
+
+		return requestOptions;
+	} catch (err) {
+		throw new NodeOperationError(this.getNode(), err as Error);
+	}
+}
 
 export const commonProperties = (
 	extraAdditionalFields: INodeProperties[] = [],
@@ -11,6 +35,16 @@ export const commonProperties = (
 		hint: 'The name of the input field containing the binary file data to be processed',
 		placeholder: 'e.g. data',
 		description: 'Name of the binary property which contains the file',
+		routing: {
+			send: {
+				preSend: [getImageBinaryData],
+			},
+			request: {
+				headers: {
+					'Content-Type': 'image/*',
+				},
+			},
+		},
 	},
 	{
 		displayName: 'Additional Fields',
@@ -25,6 +59,14 @@ export const commonProperties = (
 				type: 'string',
 				default: '',
 				placeholder: 'https://formextractorai.com/sample-invoice-1.d551279a.jpg',
+				routing: {
+					request: {
+						headers: {
+							'Content-Type': 'application/json',
+							'X-WORKER-IMAGE-URL': '={{$value}}',
+						},
+					},
+				},
 			},
 			{
 				displayName: 'Processing Mode',
@@ -45,12 +87,26 @@ export const commonProperties = (
 					},
 				],
 				default: 'per-page',
+				routing: {
+					request: {
+						headers: {
+							'X-WORKER-PROCESSING-MODE': '={{$value}}',
+						},
+					},
+				},
 			},
 			{
 				displayName: 'Auto Adjust Image Size',
 				name: 'autoAdjustImageSize',
 				type: 'boolean',
 				default: true,
+				routing: {
+					request: {
+						headers: {
+							'X-WORKER-AUTO-ADJUST-IMAGE-SIZE': '={{$value}}',
+						},
+					},
+				},
 			},
 			{
 				displayName: 'Specify OCR Engine',
@@ -75,12 +131,26 @@ export const commonProperties = (
 					},
 				],
 				default: '',
+				routing: {
+					request: {
+						headers: {
+							'X-WORKER-OCR-ENGINE': '={{$value}}',
+						},
+					},
+				},
 			},
 			{
 				displayName: 'PDF DPI',
 				name: 'pdfDpi',
 				type: 'number',
 				default: 150,
+				routing: {
+					request: {
+						headers: {
+							'X-WORKER-PDF-DPI': '={{$value}}',
+						},
+					},
+				},
 			},
 			...extraAdditionalFields,
 		],

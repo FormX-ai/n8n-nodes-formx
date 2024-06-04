@@ -1,4 +1,5 @@
 import {
+	IAllExecuteFunctions,
 	IExecuteFunctions,
 	IHookFunctions,
 	IHttpRequestOptions,
@@ -21,7 +22,7 @@ import {
 import { extractAPIv2ResponseSchema, ExtractAPIv2SuccessResponse } from './schemas/extractSync';
 import {
 	extractToWorksapceAPIv2ResponseSchema,
-	ExtractToWorkspaceAPIv2RequestHeaderData,
+	ExtractToWorkspaceAPIv2RequestData,
 	ExtractToWorkspaceAPIv2SuccessResponse,
 } from './schemas/extractToWorkspace';
 import {
@@ -123,7 +124,7 @@ export async function asyncExtract(
 
 export async function extractToWorkspace(
 	this: IExecuteFunctions,
-	data: ExtractToWorkspaceAPIv2RequestHeaderData,
+	data: ExtractToWorkspaceAPIv2RequestData,
 ): Promise<ExtractToWorkspaceAPIv2SuccessResponse> {
 	const requestOptions: IHttpRequestOptions = {
 		headers: {
@@ -159,7 +160,7 @@ export async function extractToWorkspace(
 }
 
 export async function getAsyncExtractionResult(
-	this: IExecuteFunctions,
+	this: IAllExecuteFunctions,
 	jobId: string,
 ): Promise<GetAsyncResultV2SuccessResponse | GetAsyncResultV2PendingResponse> {
 	const requestOptions: IHttpRequestOptions = {
