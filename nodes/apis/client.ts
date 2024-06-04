@@ -1,4 +1,5 @@
 import {
+	IAllExecuteFunctions,
 	IExecuteFunctions,
 	IHookFunctions,
 	IHttpRequestOptions,
@@ -159,7 +160,7 @@ export async function extractToWorkspace(
 }
 
 export async function getAsyncExtractionResult(
-	this: IExecuteFunctions,
+	this: IAllExecuteFunctions,
 	jobId: string,
 ): Promise<GetAsyncResultV2SuccessResponse | GetAsyncResultV2PendingResponse> {
 	const requestOptions: IHttpRequestOptions = {

@@ -2,12 +2,11 @@ import { INodeProperties } from 'n8n-workflow';
 import * as syncExtract from './syncExtract.operation';
 import * as asyncExtract from './asyncExtract.operation';
 import * as extractToWorkspace from './extractToWorkspace.operation';
-import * as getAsyncResult from './getAsyncResult.operation';
 import { extractAPIv2ResponseSchema } from '../../../apis/schemas/extractSync';
 import { extractionResponseParserFactory } from '../../../apis/parse';
 import { asyncExtractAPIv2ResponseSchema } from '../../../apis/schemas/extractAsync';
 import { extractToWorksapceAPIv2ResponseSchema } from '../../../apis/schemas/extractToWorkspace';
-import { getAsyncResultV2ResponseSchema } from '../../../apis/schemas/getAsyncExtractResult';
+import { pollAsyncResult } from '../../../apis/utils';
 
 export { syncExtract, asyncExtract, extractToWorkspace };
 
@@ -48,7 +47,10 @@ export const description: INodeProperties[] = [
 				action: 'Async extract document',
 				routing: {
 					output: {
-						postReceive: [extractionResponseParserFactory(asyncExtractAPIv2ResponseSchema)],
+						postReceive: [
+							extractionResponseParserFactory(asyncExtractAPIv2ResponseSchema),
+							pollAsyncResult,
+						],
 					},
 					request: {
 						method: 'POST',
@@ -71,7 +73,10 @@ export const description: INodeProperties[] = [
 				action: 'Extract document to workspace',
 				routing: {
 					output: {
-						postReceive: [extractionResponseParserFactory(extractToWorksapceAPIv2ResponseSchema)],
+						postReceive: [
+							extractionResponseParserFactory(extractToWorksapceAPIv2ResponseSchema),
+							pollAsyncResult,
+						],
 					},
 					request: {
 						method: 'POST',
@@ -87,20 +92,6 @@ export const description: INodeProperties[] = [
 					},
 				},
 			},
-			{
-				name: 'Get Async Job Result',
-				value: 'getAsyncResult',
-				description: 'Get result of async job',
-				action: 'Get result of async job',
-				routing: {
-					output: {
-						postReceive: [extractionResponseParserFactory(getAsyncResultV2ResponseSchema)],
-					},
-					request: {
-						method: 'GET',
-					},
-				},
-			},
 		],
 		default: 'syncExtract',
 		displayOptions: {
@@ -112,5 +103,4 @@ export const description: INodeProperties[] = [
 	...syncExtract.description,
 	...asyncExtract.description,
 	...extractToWorkspace.description,
-	...getAsyncResult.description,
 ];
