@@ -184,6 +184,8 @@ export const shouldRetryOnError = (err: unknown): boolean => {
 			case InferencerInvalidResponseError:
 			case RecognizerError:
 				return true;
+			default:
+				return false;
 		}
 	}
 
