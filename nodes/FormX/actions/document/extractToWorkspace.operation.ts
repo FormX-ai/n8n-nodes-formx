@@ -8,10 +8,11 @@ import {
 } from 'n8n-workflow';
 import { extractToWorkspace, getAsyncExtractionResult } from '../../../apis/client';
 import { shouldRetryOnError } from '../../../apis/parse';
-import { ExtractToWorkspaceAPIv2RequestHeaderData } from '../../../apis/schemas/extractToWorkspace';
+import { ExtractToWorkspaceAPIv2RequestData } from '../../../apis/schemas/extractToWorkspace';
 import { retry } from '../../../utils/retry';
 import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
 import { commonProperties } from './commonProperties';
+import { getBinaryDataFromField } from '../../../utils/getBinaryData';
 
 const properties: INodeProperties[] = [
 	{
@@ -44,20 +45,18 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const workspaceId = this.getNodeParameter('workspaceId', i, undefined, {
 		extractValue: true,
 	});
-	const imageUrl = this.getNodeParameter('imageUrl', i, undefined, {
-		extractValue: true,
-	});
 	const additionalFields = this.getNodeParameter('additionalFields', i, {}) as Record<string, any>;
+	const dataBuffer = await getBinaryDataFromField.call(this, i, 'binaryDataField');
 
 	let error: unknown;
 	const response = await retry(
 		async () => {
 			try {
 				return await extractToWorkspace.call(this, {
-					imageUrl: imageUrl,
+					dataBuffer: dataBuffer,
 					workspaceId: workspaceId,
 					...additionalFields,
-				} as ExtractToWorkspaceAPIv2RequestHeaderData);
+				} as ExtractToWorkspaceAPIv2RequestData);
 			} catch (err) {
 				error = err;
 				throw err;

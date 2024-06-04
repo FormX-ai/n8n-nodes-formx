@@ -2,8 +2,9 @@ export type ProcessingMode = 'per-page' | 'per-file' | 'multiple-documents-per-p
 
 export type OCREngine = 'google' | 'azure' | 'tesseract';
 
-export type ExtractAPIv2RequestHeaderData = {
-	imageUrl: string;
+export type ExtractAPIv2RequestData = {
+	dataBuffer?: Buffer;
+	imageUrl?: string;
 	processingMode?: ProcessingMode;
 	autoAdjustImageSize?: boolean;
 	ocrEngine?: OCREngine;

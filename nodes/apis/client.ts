@@ -13,7 +13,7 @@ import {
 	CheckIfExistWebhookRequest,
 	CheckIfExistWebhookResponseSuccess,
 } from './schemas/checkIfExistsWebhook';
-import { ExtractAPIv2RequestHeaderData } from './schemas/extract';
+import { ExtractAPIv2RequestData } from './schemas/extract';
 import {
 	asyncExtractAPIv2ResponseSchema,
 	AsyncExtractAPIv2SuccessResponse,
@@ -51,7 +51,7 @@ function responseParser<T>(rawJson: any, schema: ZodSchema<T, ZodTypeDef, any>):
 
 export async function syncExtract(
 	this: IExecuteFunctions,
-	data: ExtractAPIv2RequestHeaderData,
+	data: ExtractAPIv2RequestData,
 ): Promise<ExtractAPIv2SuccessResponse> {
 	const requestOptions: IHttpRequestOptions = {
 		headers: {
@@ -66,6 +66,7 @@ export async function syncExtract(
 			'X-WORKER-OCR-ENGINE': data.ocrEngine ?? '',
 		},
 		method: 'POST',
+		body: data.dataBuffer,
 		url: `${config.formxWorkerBaseUrl}/v2/extract`,
 		ignoreHttpStatusErrors: true,
 		returnFullResponse: true,
@@ -86,7 +87,7 @@ export async function syncExtract(
 
 export async function asyncExtract(
 	this: IExecuteFunctions,
-	data: ExtractAPIv2RequestHeaderData,
+	data: ExtractAPIv2RequestData,
 ): Promise<AsyncExtractAPIv2SuccessResponse> {
 	const requestOptions: IHttpRequestOptions = {
 		headers: {
@@ -101,6 +102,7 @@ export async function asyncExtract(
 			'X-WORKER-OCR-ENGINE': data.ocrEngine ?? '',
 		},
 		method: 'POST',
+		body: data.dataBuffer,
 		url: `${config.formxWorkerBaseUrl}/v2/extract`,
 		ignoreHttpStatusErrors: true,
 		returnFullResponse: true,
@@ -137,6 +139,7 @@ export async function extractToWorkspace(
 			'X-WORKER-OCR-ENGINE': data.ocrEngine ?? '',
 		},
 		method: 'POST',
+		body: data.dataBuffer,
 		url: `${config.formxWorkerBaseUrl}/v2/workspace`,
 		ignoreHttpStatusErrors: true,
 		returnFullResponse: true,

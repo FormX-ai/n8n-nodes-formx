@@ -1,6 +1,6 @@
 import * as z from 'zod';
 import { formXWorkerFailedResponseSchema } from './error';
-import { ExtractAPIv2RequestHeaderData } from './extract';
+import { ExtractAPIv2RequestData } from './extract';
 
 export const extractToWorksapceAPIv2SuccessResponseSchema = z.object({
 	status: z.literal('ok'),
@@ -24,7 +24,7 @@ export const extractToWorksapceAPIv2ResponseSchema = z.union([
 ]);
 export type ExtractToWorkspaceAPIv2Response = z.infer<typeof extractToWorksapceAPIv2ResponseSchema>;
 
-export interface ExtractToWorkspaceAPIv2RequestHeaderData extends ExtractAPIv2RequestHeaderData {
+export interface ExtractToWorkspaceAPIv2RequestData extends ExtractAPIv2RequestData {
 	workspaceId: string;
 	fileName: string;
 }

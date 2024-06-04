@@ -7,10 +7,11 @@ import {
 } from 'n8n-workflow';
 import { asyncExtract, getAsyncExtractionResult } from '../../../apis/client';
 import { shouldRetryOnError } from '../../../apis/parse';
-import { ExtractAPIv2RequestHeaderData } from '../../../apis/schemas/extract';
+import { ExtractAPIv2RequestData } from '../../../apis/schemas/extract';
 import { retry } from '../../../utils/retry';
 import { updateDisplayOptions } from '../../../utils/updateDisplayOptions';
 import { commonProperties } from './commonProperties';
+import { getBinaryDataFromField } from '../../../utils/getBinaryData';
 
 const properties: INodeProperties[] = [...commonProperties()];
 
@@ -23,9 +24,7 @@ const displayOptions: IDisplayOptions = {
 export const description = updateDisplayOptions(displayOptions, properties);
 
 export async function execute(this: IExecuteFunctions, i: number): Promise<INodeExecutionData[]> {
-	const imageUrl = this.getNodeParameter('imageUrl', i, undefined, {
-		extractValue: true,
-	});
+	const dataBuffer = await getBinaryDataFromField.call(this, i, 'binaryDataField');
 	const additionalFields = this.getNodeParameter('additionalFields', i, {}) as Record<string, any>;
 
 	let error: unknown;
@@ -33,9 +32,9 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 		async () => {
 			try {
 				return await asyncExtract.call(this, {
-					imageUrl: imageUrl,
+					dataBuffer: dataBuffer,
 					...additionalFields,
-				} as ExtractAPIv2RequestHeaderData);
+				} as ExtractAPIv2RequestData);
 			} catch (err) {
 				error = err;
 				throw err;
