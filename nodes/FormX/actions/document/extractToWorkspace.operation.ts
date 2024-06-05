@@ -4,35 +4,20 @@ import { commonProperties } from './commonProperties';
 
 const properties: INodeProperties[] = [
 	{
-		displayName: 'Workspace ID',
-		name: 'workspaceId',
+		displayName: 'File Name',
+		name: 'fileName',
 		type: 'string',
 		default: '',
 		placeholder: '',
 		routing: {
 			request: {
 				headers: {
-					'X-WORKER-WORKSPACE-ID': '={{$value}}',
+					'X-WORKER-WORKSPACE-FILE-NAME': '={{$value}}',
 				},
 			},
 		},
 	},
-	...commonProperties([
-		{
-			displayName: 'File Name',
-			name: 'fileName',
-			type: 'string',
-			default: '',
-			placeholder: '',
-			routing: {
-				request: {
-					headers: {
-						'X-WORKER-WORKSPACE-FILE-NAME': '={{$value}}',
-					},
-				},
-			},
-		},
-	]),
+	...commonProperties(),
 ];
 
 const displayOptions: IDisplayOptions = {
