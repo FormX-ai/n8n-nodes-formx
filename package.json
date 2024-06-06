@@ -1,62 +1,62 @@
 {
-  "name": "n8n-nodes-formx",
-  "version": "0.0.1",
-  "description": "n8n node to FormX extraction services.",
-  "keywords": [
-    "n8n-community-node-package",
-    "n8n",
-    "n8n-node",
-    "automation",
-    "extract",
-    "ocr"
-  ],
-  "license": "MIT",
-  "homepage": "https://www.formx.ai",
-  "author": {
-    "name": "Peter Kong",
-    "email": "pkongz@oursky.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/FormX-ai/n8n-nodes-formx"
-  },
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc && gulp build:icons",
-    "dev": "tsc --watch",
-    "format": "prettier nodes credentials --write --list-different",
-    "check-format": "prettier nodes credentials --list-different",
-    "lint": "tslint -p tsconfig.json -c tslint.json && eslint nodes credentials package.json",
-    "lintfix": "tslint --fix -p tsconfig.json -c tslint.json && eslint nodes credentials package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json",
-    "clean": "rm -rf dist"
-  },
-  "files": [
-    "dist"
-  ],
-  "n8n": {
-    "n8nNodesApiVersion": 1,
-    "credentials": [
-      "dist/credentials/FormXApi.credentials.js"
-    ],
-    "nodes": [
-      "dist/nodes/FormX/FormX.node.js"
-    ]
-  },
-  "devDependencies": {
-    "@types/express": "^4.17.6",
-    "@types/request-promise-native": "~1.0.15",
-    "@typescript-eslint/parser": "^5.36",
-    "eslint-plugin-n8n-nodes-base": "^1.11.0",
-    "gulp": "^4.0.2",
-    "n8n-core": "*",
-    "n8n-workflow": "*",
-    "prettier": "^2.7.1",
-    "tslint": "^6.1.2",
-    "typescript": "~4.8.4"
-  },
-  "dependencies": {
-    "http-status-codes": "2.3.0",
-    "zod": "3.23.8"
-  }
+	"name": "@formx-ai/n8n-nodes-formx",
+	"version": "0.0.1",
+	"description": "n8n node to FormX extraction services.",
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"n8n-node",
+		"automation",
+		"extract",
+		"ocr"
+	],
+	"license": "MIT",
+	"homepage": "https://www.formx.ai",
+	"author": {
+		"name": "Peter Kong",
+		"email": "pkongz@oursky.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/FormX-ai/n8n-nodes-formx"
+	},
+	"main": "index.js",
+	"scripts": {
+		"build": "tsc && gulp build:icons",
+		"dev": "tsc --watch",
+		"format": "prettier nodes credentials --write --list-different",
+		"check-format": "prettier nodes credentials --list-different",
+		"lint": "tslint -p tsconfig.json -c tslint.json && eslint nodes credentials package.json",
+		"lintfix": "tslint --fix -p tsconfig.json -c tslint.json && eslint nodes credentials package.json --fix",
+		"prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json",
+		"clean": "rm -rf dist"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"credentials": [
+			"dist/credentials/FormXApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/FormX/FormX.node.js"
+		]
+	},
+	"devDependencies": {
+		"@types/express": "^4.17.6",
+		"@types/request-promise-native": "~1.0.15",
+		"@typescript-eslint/parser": "^5.36",
+		"eslint-plugin-n8n-nodes-base": "^1.11.0",
+		"gulp": "^4.0.2",
+		"n8n-core": "*",
+		"n8n-workflow": "*",
+		"prettier": "^2.7.1",
+		"tslint": "^6.1.2",
+		"typescript": "~4.8.4"
+	},
+	"dependencies": {
+		"http-status-codes": "2.3.0",
+		"zod": "3.23.8"
+	}
 }
