@@ -57,14 +57,6 @@ export class FormXTrigger implements INodeType {
 				default: 'documentExtracted',
 			},
 			{
-				displayName: 'Workspace ID',
-				name: 'workspaceId',
-				type: 'string',
-				noDataExpression: true,
-				default: '',
-				placeholder: '',
-			},
-			{
 				displayName: 'Additional Fields',
 				name: 'additionalFields',
 				type: 'collection',
@@ -126,7 +118,6 @@ export class FormXTrigger implements INodeType {
 			},
 			async create(this: IHookFunctions): Promise<boolean> {
 				const webhookUrl = this.getNodeWebhookUrl('default');
-				const workspaceId = this.getNodeParameter('workspaceId');
 				const additionalFields = this.getNodeParameter('additionalFields', []) as Record<
 					string,
 					any
@@ -140,7 +131,7 @@ export class FormXTrigger implements INodeType {
 						try {
 							return await registerWebhook.call(this, {
 								hook: webhookUrl,
-								workspace_id: workspaceId,
+								workspace_id: credentials.workspaceId,
 								worker_token: credentials.accessToken,
 								deliver_on: deliverOn,
 								/* NOTE: There's an optional field `should_include_extraction_result`, Team agreed it is not useful to users.

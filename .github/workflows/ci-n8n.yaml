@@ -13,5 +13,7 @@ jobs:
           node-version: 18.18.2
       - name: Install npm package
         run: npm install
+      - name: Make setup
+        run: make setup
       - name: Run CI Check
         run: make ci

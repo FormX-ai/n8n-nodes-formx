@@ -80,7 +80,7 @@ export const description: INodeProperties[] = [
 					},
 					request: {
 						method: 'POST',
-						url: '/v2/extract',
+						url: '/v2/workspace',
 						headers: {
 							'X-WORKER-ASYNC': 'true',
 							'X-WORKER-ENCODING': 'raw',

@@ -1,9 +1,3 @@
-interface Config {
-	formxApiBaseUrl: string;
-	formxWorkerBaseUrl: string;
-	formxPortalBaseUrl: string;
-}
-
 function required(value: string | undefined): string {
 	if (!value) {
 		throw new Error('Missing required config');

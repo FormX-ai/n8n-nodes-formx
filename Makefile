@@ -1,5 +1,10 @@
 N8N_NODE_PACKAGE_NAME := n8n-nodes-formx
 
+.PHONY: setup
+setup:
+	cp .env.example .env
+	cp nodes/config.env.ts nodes/config.ts
+
 .PHONY: vendor
 vendor:
 	npm install n8n -g
@@ -28,9 +33,6 @@ clean:
 build: clean
 	npm run build
 
-.PHONY: initial-setup
-initial-setup: build
-	npm link
 
 .PHONY: start
 start:
@@ -41,3 +43,8 @@ reload: build start
 
 .PHONY: ci
 ci: check-format lint build
+
+.PHONY: publish
+publish:
+	cp nodes/config.production.ts nodes/config.ts
+	npm publish --access=public
