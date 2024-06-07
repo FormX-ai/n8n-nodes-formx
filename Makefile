@@ -41,3 +41,8 @@ reload: build start
 
 .PHONY: ci
 ci: check-format lint build
+
+.PHONY: publish
+publish:
+	cp nodes/config.production.ts nodes/config.ts
+	npm publish --access=public

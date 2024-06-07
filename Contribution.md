@@ -24,20 +24,30 @@ Please note that this installation only need to be done ONCE.
 
 1. Close this repository
 
-2. Install n8n cli
+1. Install n8n cli
 
 ```bash
 # n8n-nodes-formx/
 make vendor
 ```
 
-3. Install packages
+1. Install packages
 
 ```bash
 npm i
+
 ```
 
-4. Publish this node locally
+1. Setup enviroment variable and config
+
+```bash
+# n8n-nodes-formx/
+cp .env.example .env
+# populate .env with correct value
+cp nodes/config.development.ts nodes/config.ts
+```
+
+1. Publish this node locally
 
 ```bash
 # n8n-nodes-formx/
@@ -46,7 +56,7 @@ npm link
 ```
 
 
-5. Initialize custom package in your local n8n instance (usually `~/.n8n`)
+1. Initialize custom package in your local n8n instance (usually `~/.n8n`)
 
 ```bash
 cd ~/.n8n # or your local n8n instance location
@@ -55,14 +65,14 @@ cd custom
 npm init -y # default params work fine here, remove -y if you want to customize
 ```
 
-6. Install the node into your local n8n instance
+1. Install the node into your local n8n instance
 
 ```bash
 # ~/.n8n/custom
 npm link n8n-nodes-formx
 ```
 
-7. Run your n8n instance
+1. Run your n8n instance
 
 ```bash
 # n8n-nodes-formx/
