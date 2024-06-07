@@ -44,7 +44,7 @@ npm i
 # n8n-nodes-formx/
 cp .env.example .env
 # populate .env with correct value
-cp nodes/config.development.ts nodes/config.ts
+cp nodes/config.env.ts nodes/config.ts
 ```
 
 1. Publish this node locally
