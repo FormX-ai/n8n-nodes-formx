@@ -42,9 +42,8 @@ npm i
 
 ```bash
 # n8n-nodes-formx/
-cp .env.example .env
+make setup
 # populate .env with correct value
-cp nodes/config.env.ts nodes/config.ts
 ```
 
 1. Publish this node locally
